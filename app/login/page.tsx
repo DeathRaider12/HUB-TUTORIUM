@@ -99,6 +99,7 @@ const provider = new GoogleAuthProvider();
           await createUserWithEmailAndPassword(auth, formData.email, formData.password)
           // Immediately sign in after creation to establish session.
           await signInWithEmailAndPassword(auth, formData.email, formData.password)
+          await sendEmailVerification(userCredential.user)
           toast.success("Admin account created and logged in!")
           router.push("/admin")
           setLoading(false)

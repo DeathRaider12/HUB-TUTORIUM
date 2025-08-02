@@ -38,6 +38,7 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [resetEmailSent, setResetEmailSent] = useState(false)
   const [isAdminLogin, setIsAdminLogin] = useState(false)
+const provider = new GoogleAuthProvider();
 
   const redirectTo = searchParams.get("redirect") || "/dashboard"
 

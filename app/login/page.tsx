@@ -39,8 +39,7 @@ export default function LoginPage() {
   const [resetEmailSent, setResetEmailSent] = useState(false)
   const [isAdminLogin, setIsAdminLogin] = useState(false)
 const provider = new GoogleAuthProvider();
-const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-await sendEmailVerification(userCredential.user)
+
   const redirectTo = searchParams.get("redirect") || "/dashboard"
 
   // Check if entered email is an admin account

@@ -65,7 +65,6 @@ export function useAuth(): AuthState {
         emailVerified: firebaseUser.emailVerified || isAdmin,
         lastLoginAt: new Date(),
         updatedAt: new Date(),
-        ...(isAdmin && { isHardcodedAdmin: true }),
       }
 
       await setDoc(userDocRef, userData, { merge: true })

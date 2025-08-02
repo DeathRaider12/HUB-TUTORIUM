@@ -34,7 +34,7 @@ interface AdminStats {
 }
 
 export default function AdminPage() {
-  const { user, isAdmin, isHardcodedAdmin, loading } = useAuth()
+  const { userData, isAdmin, loading } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
@@ -154,7 +154,7 @@ export default function AdminPage() {
                   <Crown className="h-3 w-3 mr-1" />
                   Administrator
                 </Badge>
-                {isHardcodedAdmin && <Badge className="bg-purple-100 text-purple-800">System Admin</Badge>}
+                {userData?.isHardcodedAdmin && <Badge className="bg-purple-100 text-purple-800">System Admin</Badge>}
               </div>
             </div>
           </div>

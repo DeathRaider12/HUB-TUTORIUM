@@ -27,7 +27,6 @@ export function validateAdminCredentials(email: string, password: string): boole
   return admin ? admin.password === password : false
 }
 
-// Re-adding this export to resolve the "does not provide an export named" error
 export function getAdminAccountInfo(email: string) {
   return ADMIN_ACCOUNTS.find((admin) => admin.email.toLowerCase() === email.toLowerCase())
 }

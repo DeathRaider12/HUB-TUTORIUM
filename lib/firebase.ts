@@ -1,28 +1,50 @@
-import { initializeApp, getApps, getApp } from "firebase/app"
-import { getAuth, connectAuthEmulator } from "firebase/auth"
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore"
-import { getStorage, connectStorageEmulator } from "firebase/storage"
-import { GoogleAuthProvider } from "firebase/auth"
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app"
+import { getAuth, GoogleAuthProvider, connectAuthEmulator, type Auth } from "firebase/auth"
+import { getFirestore, connectFirestoreEmulator, type Firestore } from "firebase/firestore"
+import { getStorage, connectStorageEmulator, type FirebaseStorage } from "firebase/storage"
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+// Validate environment variables
+const requiredEnvVars = [
+  "NEXT_PUBLIC_FIREBASE_API_KEY",
+  "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
+  "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
+  "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+  "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
+  "NEXT_PUBLIC_FIREBASE_APP_ID",
+] as const
+
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    throw new Error(`Missing required environment variable: ${envVar}`)
+  }
 }
 
-// Initialize Firebase
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+}
 
-// Initialize Firebase services
-export const auth = getAuth(app)
-export const db = getFirestore(app)
-export const storage = getStorage(app)
+// Initialize Firebase app (singleton pattern)
+let app: FirebaseApp
+if (getApps().length === 0) {
+  app = initializeApp(firebaseConfig)
+} else {
+  app = getApp()
+}
+
+// Initialize services
+export const auth: Auth = getAuth(app)
+export const db: Firestore = getFirestore(app)
+export const storage: FirebaseStorage = getStorage(app)
 
 // Configure Google Auth Provider
 export const googleProvider = new GoogleAuthProvider()
+googleProvider.addScope("email")
+googleProvider.addScope("profile")
 googleProvider.setCustomParameters({
   prompt: "select_account",
 })
@@ -34,17 +56,16 @@ if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
     if (!auth.config.emulator) {
       connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true })
     }
-    // @ts-ignore
+    // @ts-ignore - _delegate is internal but needed for emulator check
     if (!db._delegate._databaseId.projectId.includes("demo-")) {
       connectFirestoreEmulator(db, "localhost", 8080)
     }
-    // @ts-ignore
-    if (!storage._delegate._host.includes("localhost")) {
+    // @ts-ignore - similar internal check for storage
+    if (!storage._location.bucket.includes("demo-")) {
       connectStorageEmulator(storage, "localhost", 9199)
     }
   } catch (error) {
-    // Emulators already connected or not available
-    console.log("Firebase emulators connection skipped:", error)
+    console.warn("Firebase emulator connection failed:", error)
   }
 }
 

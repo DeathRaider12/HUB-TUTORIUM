@@ -1,14 +1,18 @@
-// Admin configuration - DO NOT EXPOSE TO CLIENT
+// This file contains configuration for hardcoded admin accounts.
+// In a production environment, sensitive data like passwords should not be hardcoded
+// directly in client-side code due to security risks. Consider using server-side checks
+// (e.g., Firebase Cloud Functions, Next.js API Routes, or Server Actions) for admin authentication.
+
 const ADMIN_ACCOUNTS = [
   {
     email: "envostructs@gmail.com",
-    password: "ADMIN_TUTORIUM",
+    password: "ADMIN_TUTORIUM", // This password will be used for Firebase Auth account creation if not exists
     role: "admin" as const,
     displayName: "Admin User 1",
   },
   {
     email: "lateefedidi4@gmail.com",
-    password: "ADMIN_TUTORIUM",
+    password: "ADMIN_TUTORIUM", // This password will be used for Firebase Auth account creation if not exists
     role: "admin" as const,
     displayName: "Admin User 2",
   },

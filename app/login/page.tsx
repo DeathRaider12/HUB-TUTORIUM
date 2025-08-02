@@ -75,32 +75,64 @@ export default function LoginPage() {
   }
 
   const handleAdminLogin = async () => {
+    // Local validation of admin credentials first
     if (!validateAdminCredentials(formData.email, formData.password)) {
-      setError("Invalid admin credentials")
+      setError("Invalid admin credentials. Please check the email and the hardcoded password.")
       return false
     }
+
+    setLoading(true)
+    setError("")
 
     try {
-      // Try to sign in with existing account first
-      try {
-        await signInWithEmailAndPassword(auth, formData.email, formData.password)
-      } catch (signInError: any) {
-        // If account doesn't exist, create it with the admin password
-        if (signInError.code === "auth/user-not-found") {
+      // First, attempt to sign in with existing account.
+      await signInWithEmailAndPassword(auth, formData.email, formData.password)
+    } catch (signInError: any) {
+      console.error("Initial Firebase sign-in error for admin:", signInError)
+      // Explicitly check for user-not-found or general invalid-credential that implies not found.
+      if (signInError.code === "auth/user-not-found" || signInError.code === "auth/invalid-credential") {
+        try {
+          // If user doesn't exist or a general invalid credential error occurred, try creating the user.
+          // This assumes `auth/invalid-credential` can mean 'user-not-found' when an account isn't registered.
           await createUserWithEmailAndPassword(auth, formData.email, formData.password)
-        } else {
-          throw signInError
+          // Immediately sign in after creation to establish session.
+          await signInWithEmailAndPassword(auth, formData.email, formData.password)
+          toast.success("Admin account created and logged in!")
+          router.push("/admin")
+          setLoading(false)
+          return true
+        } catch (createError: any) {
+          console.error("Admin account creation/re-login error:", createError)
+          if (createError.code === "auth/email-already-in-use") {
+            // This case should ideally not happen if signInError was 'user-not-found'
+            // but if it does, it implies password mismatch for an existing user.
+            setError(
+              "Admin account exists in Firebase but with a different password. Please ensure it's 'ADMIN_TUTORIUM' or reset it via Firebase console if not already.",
+            )
+          } else if (createError.code === "auth/weak-password") {
+            setError(
+              "Admin password 'ADMIN_TUTORIUM' is too weak for Firebase. Consider changing it to a stronger one or modifying Firebase project's password policy.",
+            )
+          } else {
+            setError(`Failed to create or re-authenticate admin account: ${createError.message}`)
+          }
+          setLoading(false)
+          return false
         }
+      } else if (signInError.code === "auth/wrong-password") {
+        setError("Incorrect admin password in Firebase. Please ensure it is 'ADMIN_TUTORIUM'.")
+      } else {
+        setError(`Admin login failed: ${signInError.message || "An unknown error occurred."}`)
       }
-
-      toast.success("Admin login successful!")
-      router.push("/admin")
-      return true
-    } catch (error: any) {
-      console.error("Admin login error:", error)
-      setError("Admin login failed. Please try again.")
+      setLoading(false)
       return false
     }
+
+    // If no error was thrown above, login was successful.
+    toast.success("Admin login successful!")
+    router.push("/admin")
+    setLoading(false)
+    return true
   }
 
   const handleRegularLogin = async () => {
@@ -152,7 +184,7 @@ export default function LoginPage() {
         await handleRegularLogin()
       }
     } finally {
-      setLoading(false)
+      // setLoading(false) // setLoading is handled inside handleAdminLogin/handleRegularLogin
     }
   }
 
@@ -189,7 +221,7 @@ export default function LoginPage() {
     }
 
     if (isAdminLogin) {
-      setError("Password reset is not available for admin accounts.")
+      setError("Password reset is not available for hardcoded admin accounts.")
       return
     }
 
@@ -247,7 +279,7 @@ export default function LoginPage() {
           {isAdminLogin && (
             <Alert>
               <Shield className="h-4 w-4" />
-              <AlertDescription>You are logging in as an administrator.</AlertDescription>
+              <AlertDescription>You are logging in as an administrator using hardcoded credentials.</AlertDescription>
             </Alert>
           )}
 

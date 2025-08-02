@@ -159,6 +159,7 @@ await sendEmailVerification(user)
 
       toast.success("Account created! Please check your email to verify your account.")
       router.push("/login?message=verify-email")
+      router.push("/verify-email?message=verify-email")
     } catch (err: any) {
       console.error("Signup error:", err)
 

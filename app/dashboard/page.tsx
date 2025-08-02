@@ -7,10 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { auth } from "@/lib/firebase"
-import { onAuthStateChanged } from "firebase/auth"
 import {
   BookOpen,
   HelpCircle,

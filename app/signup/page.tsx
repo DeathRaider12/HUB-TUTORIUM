@@ -137,6 +137,7 @@ export default function SignupPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
       const user = userCredential.user
 
+await sendEmailVerification(user)
       // Update user profile
       await updateProfile(user, {
         displayName: `${formData.firstName} ${formData.lastName}`,

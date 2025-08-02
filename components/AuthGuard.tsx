@@ -31,6 +31,14 @@ export default function AuthGuard({
     if (!loading && !isAuthenticated) {
       router.push(fallbackPath)
     }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/login")
+      } else if (!user.emailVerified) {
+        router.push("/verify-email?message=verify-email")
+      } else {
+        setLoading(false)
+      }
   }, [loading, isAuthenticated, router, fallbackPath])
 
   // Loading state

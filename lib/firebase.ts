@@ -37,10 +37,9 @@ if (getApps().length === 0) {
 }
 
 // Initialize services
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
-export const auth= getAuth(app)
-export const db= getFirestore(app)
-export const storage= getStorage(app)
+export const auth: Auth = getAuth(app)
+export const db: Firestore = getFirestore(app)
+export const storage: FirebaseStorage = getStorage(app)
 
 // Configure Google Auth Provider
 export const googleProvider = new GoogleAuthProvider()

@@ -8,12 +8,12 @@ import { isAdminAccount, getAdminAccountInfo } from "@/lib/adminConfig"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
 
-export interface UserData {
+interface UserData {
   uid: string
   email: string | null
   displayName: string | null
   emailVerified: boolean
-  role: "student" | "lecturer" | "admin" | "pending"
+  role?: string
   requestedRole?: "student" | "lecturer"
   createdAt?: Date
   lastLoginAt?: Date
@@ -21,14 +21,18 @@ export interface UserData {
 }
 
 interface AuthState {
-  user: UserData | null
+  user: FirebaseUser | null
+  userData: UserData | null
+  isAuthenticated: boolean
   loading: boolean
   error: string | null
 }
 
-export function useAuth() {
+export function useAuth(): AuthState {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
+    userData: null,
+    isAuthenticated: false,
     loading: true,
     error: null,
   })
@@ -37,7 +41,7 @@ export function useAuth() {
   const signOut = useCallback(async () => {
     try {
       await firebaseSignOut(auth)
-      setAuthState((prev) => ({ ...prev, user: null }))
+      setAuthState((prev) => ({ ...prev, user: null, userData: null }))
       router.push("/login")
       toast.success("Logged out successfully")
     } catch (error) {
@@ -82,7 +86,7 @@ export function useAuth() {
         }
 
         if (!firebaseUser) {
-          setAuthState({ user: null, loading: false, error: null })
+          setAuthState({ user: null, userData: null, isAuthenticated: false, loading: false, error: null })
           return
         }
 
@@ -92,17 +96,17 @@ export function useAuth() {
         if (isAdmin) {
           // For admin accounts, create/update user document and set state directly
           const userData = await createOrUpdateUserDocument(firebaseUser, true)
-          const user: UserData = {
+          const user: FirebaseUser = {
             uid: firebaseUser.uid,
             email: firebaseUser.email,
-            displayName: userData.displayName,
-            emailVerified: true, // Admin accounts are always verified
-            role: "admin",
-            isHardcodedAdmin: true,
-            createdAt: new Date(),
-            lastLoginAt: new Date(),
+            displayName: firebaseUser.displayName,
+            emailVerified: firebaseUser.emailVerified,
+            phoneNumber: firebaseUser.phoneNumber,
+            providerData: firebaseUser.providerData,
+            stsTokenManager: firebaseUser.stsTokenManager,
+            toJSON: firebaseUser.toJSON,
           }
-          setAuthState({ user, loading: false, error: null })
+          setAuthState({ user, userData, isAuthenticated: true, loading: false, error: null })
         } else {
           // For regular users, listen to user document changes in real-time
           const userDocRef = doc(db, "users", firebaseUser.uid)
@@ -116,19 +120,18 @@ export function useAuth() {
                 userData = await createOrUpdateUserDocument(firebaseUser, false)
               }
 
-              const user: UserData = {
+              const user: FirebaseUser = {
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
                 displayName: firebaseUser.displayName || userData?.displayName,
                 emailVerified: firebaseUser.emailVerified,
-                role: userData?.role || "pending",
-                requestedRole: userData?.requestedRole,
-                createdAt: userData?.createdAt?.toDate?.() || new Date(),
-                lastLoginAt: userData?.lastLoginAt?.toDate?.() || new Date(),
-                isHardcodedAdmin: false,
+                phoneNumber: firebaseUser.phoneNumber,
+                providerData: firebaseUser.providerData,
+                stsTokenManager: firebaseUser.stsTokenManager,
+                toJSON: firebaseUser.toJSON,
               }
 
-              setAuthState({ user, loading: false, error: null })
+              setAuthState({ user, userData, isAuthenticated: true, loading: false, error: null })
             },
             (error) => {
               console.error("User document listener error:", error)
@@ -144,6 +147,8 @@ export function useAuth() {
         console.error("Auth state change error:", error)
         setAuthState({
           user: null,
+          userData: null,
+          isAuthenticated: false,
           loading: false,
           error: "Authentication error occurred",
         })
@@ -158,15 +163,5 @@ export function useAuth() {
     }
   }, [createOrUpdateUserDocument])
 
-  return {
-    ...authState,
-    signOut,
-    isAuthenticated: !!authState.user,
-    isEmailVerified: authState.user?.emailVerified ?? false,
-    isAdmin: authState.user?.role === "admin",
-    isLecturer: authState.user?.role === "lecturer",
-    isStudent: authState.user?.role === "student",
-    isPending: authState.user?.role === "pending",
-    isHardcodedAdmin: authState.user?.isHardcodedAdmin ?? false,
-  }
+  return authState
 }

@@ -8,7 +8,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   sendPasswordResetEmail,
-  createUserWithEmailAndPassword, sendEmailVerification
+  createUserWithEmailAndPassword,
 } from "firebase/auth"
 import { auth, googleProvider } from "@/lib/firebase"
 import { validateAdminCredentials, isAdminAccount } from "@/lib/adminConfig"
@@ -22,13 +22,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
 import { Eye, EyeOff, Mail, Lock, AlertCircle, Shield } from "lucide-react"
 import Link from "next/link"
-import { GoogleAuthProvider } from "firebase/auth";
+import { GoogleAuthProvider } from "firebase/auth"
 
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { isAuthenticated, loading: authLoading } = useAuth()
-
 
   const [formData, setFormData] = useState({
     email: "",
@@ -39,7 +38,7 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [resetEmailSent, setResetEmailSent] = useState(false)
   const [isAdminLogin, setIsAdminLogin] = useState(false)
-const provider = new GoogleAuthProvider();
+  const provider = new GoogleAuthProvider()
 
   const redirectTo = searchParams.get("redirect") || "/dashboard"
 

@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from "lucide-react"
 import Link from "next/link"
+import { sendEmailVerification } from "firebase/auth"
 
 interface FormData {
   firstName: string

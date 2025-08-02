@@ -29,7 +29,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams()
   const { isAuthenticated, loading: authLoading } = useAuth()
 
-const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",

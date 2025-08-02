@@ -22,6 +22,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
 import { Eye, EyeOff, Mail, Lock, AlertCircle, Shield } from "lucide-react"
 import Link from "next/link"
+import { GoogleAuthProvider } from "firebase/auth";
 
 export default function LoginPage() {
   const router = useRouter()

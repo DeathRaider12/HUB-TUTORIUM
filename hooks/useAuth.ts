@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { onAuthStateChanged, type User as FirebaseUser, signOut as firebaseSignOut } from "firebase/auth"
-import { doc, onSnapshot, type Unsubscribe } from "firebase/firestore"
+import { doc, onSnapshot, setDoc, type Unsubscribe } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase"
+import { isAdminAccount, getAdminAccountInfo } from "@/lib/adminConfig"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
 
@@ -16,6 +17,7 @@ export interface UserData {
   requestedRole?: "student" | "lecturer"
   createdAt?: Date
   lastLoginAt?: Date
+  isHardcodedAdmin?: boolean
 }
 
 interface AuthState {
@@ -44,6 +46,30 @@ export function useAuth() {
     }
   }, [router])
 
+  const createOrUpdateUserDocument = useCallback(async (firebaseUser: FirebaseUser, isAdmin = false) => {
+    try {
+      const userDocRef = doc(db, "users", firebaseUser.uid)
+      const adminInfo = isAdmin ? getAdminAccountInfo(firebaseUser.email || "") : null
+
+      const userData = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: adminInfo?.displayName || firebaseUser.displayName || firebaseUser.email?.split("@")[0],
+        role: isAdmin ? "admin" : "pending",
+        emailVerified: firebaseUser.emailVerified || isAdmin,
+        lastLoginAt: new Date(),
+        updatedAt: new Date(),
+        ...(isAdmin && { isHardcodedAdmin: true }),
+      }
+
+      await setDoc(userDocRef, userData, { merge: true })
+      return userData
+    } catch (error) {
+      console.error("Error creating/updating user document:", error)
+      throw error
+    }
+  }, [])
+
   useEffect(() => {
     let userDocUnsubscribe: Unsubscribe | null = null
 
@@ -60,35 +86,60 @@ export function useAuth() {
           return
         }
 
-        // Listen to user document changes in real-time
-        const userDocRef = doc(db, "users", firebaseUser.uid)
-        userDocUnsubscribe = onSnapshot(
-          userDocRef,
-          (docSnapshot) => {
-            const userData = docSnapshot.exists() ? docSnapshot.data() : null
+        // Check if this is a hardcoded admin account
+        const isAdmin = isAdminAccount(firebaseUser.email || "")
 
-            const user: UserData = {
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              displayName: firebaseUser.displayName,
-              emailVerified: firebaseUser.emailVerified,
-              role: userData?.role || "pending",
-              requestedRole: userData?.requestedRole,
-              createdAt: userData?.createdAt?.toDate(),
-              lastLoginAt: userData?.lastLoginAt?.toDate(),
-            }
+        if (isAdmin) {
+          // For admin accounts, create/update user document and set state directly
+          const userData = await createOrUpdateUserDocument(firebaseUser, true)
+          const user: UserData = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: userData.displayName,
+            emailVerified: true, // Admin accounts are always verified
+            role: "admin",
+            isHardcodedAdmin: true,
+            createdAt: new Date(),
+            lastLoginAt: new Date(),
+          }
+          setAuthState({ user, loading: false, error: null })
+        } else {
+          // For regular users, listen to user document changes in real-time
+          const userDocRef = doc(db, "users", firebaseUser.uid)
+          userDocUnsubscribe = onSnapshot(
+            userDocRef,
+            async (docSnapshot) => {
+              let userData = docSnapshot.exists() ? docSnapshot.data() : null
 
-            setAuthState({ user, loading: false, error: null })
-          },
-          (error) => {
-            console.error("User document listener error:", error)
-            setAuthState((prev) => ({
-              ...prev,
-              loading: false,
-              error: "Failed to load user data",
-            }))
-          },
-        )
+              // If user document doesn't exist, create it
+              if (!userData) {
+                userData = await createOrUpdateUserDocument(firebaseUser, false)
+              }
+
+              const user: UserData = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                displayName: firebaseUser.displayName || userData?.displayName,
+                emailVerified: firebaseUser.emailVerified,
+                role: userData?.role || "pending",
+                requestedRole: userData?.requestedRole,
+                createdAt: userData?.createdAt?.toDate?.() || new Date(),
+                lastLoginAt: userData?.lastLoginAt?.toDate?.() || new Date(),
+                isHardcodedAdmin: false,
+              }
+
+              setAuthState({ user, loading: false, error: null })
+            },
+            (error) => {
+              console.error("User document listener error:", error)
+              setAuthState((prev) => ({
+                ...prev,
+                loading: false,
+                error: "Failed to load user data",
+              }))
+            },
+          )
+        }
       } catch (error) {
         console.error("Auth state change error:", error)
         setAuthState({
@@ -105,7 +156,7 @@ export function useAuth() {
         userDocUnsubscribe()
       }
     }
-  }, [])
+  }, [createOrUpdateUserDocument])
 
   return {
     ...authState,
@@ -116,5 +167,6 @@ export function useAuth() {
     isLecturer: authState.user?.role === "lecturer",
     isStudent: authState.user?.role === "student",
     isPending: authState.user?.role === "pending",
+    isHardcodedAdmin: authState.user?.isHardcodedAdmin ?? false,
   }
 }

@@ -134,6 +134,16 @@ export default function AuthGuard({
       </div>
     )
   }
+  return () => unsubscribe()
+  }, [router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 rounded-full border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
 
   return <>{children}</>
 }

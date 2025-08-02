@@ -8,7 +8,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   sendPasswordResetEmail,
-  createUserWithEmailAndPassword,
+  createUserWithEmailAndPassword, sendEmailVerification
 } from "firebase/auth"
 import { auth, googleProvider } from "@/lib/firebase"
 import { validateAdminCredentials, isAdminAccount } from "@/lib/adminConfig"

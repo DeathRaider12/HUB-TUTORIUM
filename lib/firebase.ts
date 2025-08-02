@@ -37,12 +37,12 @@ if (getApps().length === 0) {
 }
 
 // Initialize services
-export const auth: Auth = getAuth(app)
-export const db: Firestore = getFirestore(app)
-export const storage: FirebaseStorage = getStorage(app)
+const auth: Auth = getAuth(app)
+const db: Firestore = getFirestore(app)
+const storage: FirebaseStorage = getStorage(app)
+const googleProvider = new GoogleAuthProvider()
 
 // Configure Google Auth Provider
-export const googleProvider = new GoogleAuthProvider()
 googleProvider.addScope("email")
 googleProvider.addScope("profile")
 googleProvider.setCustomParameters({
@@ -69,4 +69,5 @@ if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
   }
 }
 
+export { auth, db, googleProvider }
 export default app

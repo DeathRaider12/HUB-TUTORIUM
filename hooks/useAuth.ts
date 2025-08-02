@@ -24,6 +24,7 @@ interface AuthState {
   user: FirebaseUser | null
   userData: UserData | null
   isAuthenticated: boolean
+  isAdmin: boolean
   loading: boolean
   error: string | null
 }
@@ -33,6 +34,7 @@ export function useAuth(): AuthState {
     user: null,
     userData: null,
     isAuthenticated: false,
+    isAdmin: false,
     loading: true,
     error: null,
   })
@@ -86,7 +88,14 @@ export function useAuth(): AuthState {
         }
 
         if (!firebaseUser) {
-          setAuthState({ user: null, userData: null, isAuthenticated: false, loading: false, error: null })
+          setAuthState({
+            user: null,
+            userData: null,
+            isAuthenticated: false,
+            isAdmin: false,
+            loading: false,
+            error: null,
+          })
           return
         }
 
@@ -106,7 +115,7 @@ export function useAuth(): AuthState {
             stsTokenManager: firebaseUser.stsTokenManager,
             toJSON: firebaseUser.toJSON,
           }
-          setAuthState({ user, userData, isAuthenticated: true, loading: false, error: null })
+          setAuthState({ user, userData, isAuthenticated: true, isAdmin: true, loading: false, error: null })
         } else {
           // For regular users, listen to user document changes in real-time
           const userDocRef = doc(db, "users", firebaseUser.uid)
@@ -131,7 +140,7 @@ export function useAuth(): AuthState {
                 toJSON: firebaseUser.toJSON,
               }
 
-              setAuthState({ user, userData, isAuthenticated: true, loading: false, error: null })
+              setAuthState({ user, userData, isAuthenticated: true, isAdmin: false, loading: false, error: null })
             },
             (error) => {
               console.error("User document listener error:", error)
@@ -149,6 +158,7 @@ export function useAuth(): AuthState {
           user: null,
           userData: null,
           isAuthenticated: false,
+          isAdmin: false,
           loading: false,
           error: "Authentication error occurred",
         })

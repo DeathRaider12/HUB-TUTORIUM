@@ -24,7 +24,7 @@ export default function AuthGuard({
   allowedRoles,
   fallbackPath = "/login",
 }: AuthGuardProps) {
-  const { user, loading, error, isAuthenticated, isEmailVerified } = useAuth()
+  const { user, loading, error, isAuthenticated, isEmailVerified,setLoading } = useAuth(), useState(true)
   const router = useRouter()
 
   useEffect(() => {

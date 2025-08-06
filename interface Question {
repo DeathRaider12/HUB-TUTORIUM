@@ -1,0 +1,8 @@
+interface Question {
+  // ...existing fields
+  bounty?: number          // Optional points reward
+  visibility: string       // public/private/institution
+  relatedQuestions: string[] // Similar questions
+  followersCount: number   // Users following the question
+  attachments: string[]    // Files, images, etc.
+}

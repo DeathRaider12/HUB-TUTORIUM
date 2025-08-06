@@ -1,0 +1,7 @@
+interface Analytics {
+  userEngagement: Metrics
+  contentPerformance: Metrics
+  learningOutcomes: Metrics
+  userRetention: Metrics
+  responseMetrics: Metrics
+}

@@ -1,0 +1,9 @@
+interface Profile {
+  credentials: string[]
+  publications: string[]
+  expertise: string[]
+  institution: string
+  linkedinProfile?: string
+  rating: number
+  responseRate: number
+}

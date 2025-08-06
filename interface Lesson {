@@ -1,0 +1,7 @@
+interface Lesson {
+  // ...existing fields
+  transcription: string    // Searchable text
+  chapters: Chapter[]      // Structured segments
+  quizzes: Quiz[]         // Assessment tools
+  resources: Resource[]    // Additional materials
+}

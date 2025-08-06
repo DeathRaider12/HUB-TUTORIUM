@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 
 // Your Firebase config (replace with your actual config)
+import { firebaseConfig } from './config.js';
 const firebaseConfig = {
     apiKey: "AIzaSyAEvPBMq5wdHMTS-zL2075A8rAThrNSWf4",
     authDomain: "tutorium-a994f.firebaseapp.com",
@@ -403,6 +404,7 @@ class IntegratedDatabaseMigration {
             // Step 3: Initialize new systems
             await this.initializeAnalytics();
             await this.createSystemConfig();
+            await this.initializeStudyGroups();
 
             console.log('🎉 Migration completed successfully!');
             console.log('Your platform now supports:');
@@ -421,6 +423,43 @@ class IntegratedDatabaseMigration {
     }
 
     // Helper method to create achievements for existing users
+    async initializeStudyGroups() {
+        console.log('🔄 Initializing study groups system...');
+
+        const initialGroups = [
+            {
+                name: "Engineering Basics",
+                description: "A group for discussing fundamental engineering concepts",
+                topics: ["mathematics", "physics", "mechanics"],
+                maxMembers: 50,
+                visibility: "public",
+                meetingSchedule: "Every Monday at 3 PM UTC",
+                createdAt: Timestamp.now(),
+                updatedAt: Timestamp.now()
+            },
+            {
+                name: "Programming Practice",
+                description: "Collaborative coding and problem-solving",
+                topics: ["algorithms", "data structures", "coding challenges"],
+                maxMembers: 30,
+                visibility: "public",
+                meetingSchedule: "Every Wednesday at 5 PM UTC",
+                createdAt: Timestamp.now(),
+                updatedAt: Timestamp.now()
+            }
+        ];
+
+        const batch = writeBatch(db);
+
+        initialGroups.forEach((group) => {
+            const groupRef = doc(collection(db, 'study_groups'));
+            batch.set(groupRef, group);
+        });
+
+        await batch.commit();
+        console.log(`✅ Created ${initialGroups.length} initial study groups`);
+    }
+
     async createAchievementsForExistingUsers() {
         console.log('🔄 Creating achievements for existing users...');
 

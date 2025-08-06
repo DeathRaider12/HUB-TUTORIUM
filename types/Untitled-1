@@ -1,0 +1,15 @@
+// In your app/layout.tsx or similar
+import { setupRealtimeListeners } from '@/lib/realtime';
+import { useAuth } from '@/hooks/useAuth';
+
+export default function RootLayout({ children }) {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      setupRealtimeListeners(user.uid);
+    }
+  }, [user]);
+
+  return <>{children}</>;
+}

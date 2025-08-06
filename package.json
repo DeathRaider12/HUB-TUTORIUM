@@ -6,11 +6,15 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "setup": "node setup.js",
+    "init-admin": "ts-node scripts/init-admin.ts",
+    "verify-setup": "ts-node lib/verifySetup.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@monaco-editor/react": "^4.7.0",
+    "firebase-admin": "^11.10.1",
     "@radix-ui/react-accordion": "latest",
     "@radix-ui/react-alert-dialog": "latest",
     "@radix-ui/react-aspect-ratio": "latest",
@@ -42,7 +46,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "latest",
-    "date-fns": "4.1.0",
+    "date-fns": "^4.1.0",
     "embla-carousel-react": "latest",
     "firebase": "latest",
     "geist": "^1.3.1",
@@ -64,7 +68,8 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "latest",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "zustand": "^4.5.7"
   },
   "devDependencies": {
     "@types/node": "^22",

@@ -26,7 +26,10 @@ export default function NavBar() {
     { href: "/", label: "Home" },
     { href: "/lessons", label: "Lessons" },
     { href: "/questions", label: "Questions" },
-    ...(isAuthenticated ? [{ href: "/ask", label: "Ask Question" }] : []),
+    ...(isAuthenticated ? [
+      { href: "/ask", label: "Ask Question" },
+      { href: "/study-groups", label: "Study Groups" }
+    ] : []),
   ]
 
   const userMenuItems = [
@@ -34,9 +37,9 @@ export default function NavBar() {
     { href: "/profile", label: "Profile", icon: Settings },
     ...(isLecturer
       ? [
-          { href: "/lecturer/questions", label: "Answer Questions", icon: HelpCircle },
-          { href: "/lecturer/upload", label: "Upload Lessons", icon: BookOpen },
-        ]
+        { href: "/lecturer/questions", label: "Answer Questions", icon: HelpCircle },
+        { href: "/lecturer/upload", label: "Upload Lessons", icon: BookOpen },
+      ]
       : []),
     ...(isAdmin ? [{ href: "/admin", label: "Admin Panel", icon: Settings }] : []),
   ]

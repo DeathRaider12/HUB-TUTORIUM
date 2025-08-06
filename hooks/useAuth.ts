@@ -38,6 +38,22 @@ export function useAuth(): AuthState {
     loading: true,
     error: null,
   })
+
+  // Check for admin status when user changes
+  useEffect(() => {
+    if (authState.user?.email) {
+      const checkAdminStatus = async () => {
+        try {
+          const idTokenResult = await authState.user?.getIdTokenResult();
+          const isAdmin = idTokenResult?.claims?.admin === true || isAdminAccount(authState.user.email!);
+          setAuthState(prev => ({ ...prev, isAdmin }));
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+        }
+      };
+      checkAdminStatus();
+    }
+  }, [authState.user])
   const router = useRouter()
 
   const signOut = useCallback(async () => {

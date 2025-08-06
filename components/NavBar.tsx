@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { FC, useState } from "react"
 import Link from "next/link"
+import { User, Settings, HelpCircle, BookOpen, LogOut, Menu } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -14,32 +15,39 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, User, LogOut, Settings, BookOpen, HelpCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-export default function NavBar() {
+interface NavigationItem {
+  href: string
+  label: string
+  icon?: typeof User
+}
+
+const NavBar: FC = () => {
   const { user, isAuthenticated, signOut, isLecturer, isAdmin } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
 
-  const navigationItems = [
+  const navigationItems: NavigationItem[] = [
     { href: "/", label: "Home" },
     { href: "/lessons", label: "Lessons" },
     { href: "/questions", label: "Questions" },
-    ...(isAuthenticated ? [
-      { href: "/ask", label: "Ask Question" },
-      { href: "/study-groups", label: "Study Groups" }
-    ] : []),
+    ...(isAuthenticated
+      ? [
+          { href: "/ask", label: "Ask Question" },
+          { href: "/study-groups", label: "Study Groups" },
+        ]
+      : []),
   ]
 
-  const userMenuItems = [
+  const userMenuItems: NavigationItem[] = [
     { href: "/dashboard", label: "Dashboard", icon: User },
     { href: "/profile", label: "Profile", icon: Settings },
     ...(isLecturer
       ? [
-        { href: "/lecturer/questions", label: "Answer Questions", icon: HelpCircle },
-        { href: "/lecturer/upload", label: "Upload Lessons", icon: BookOpen },
-      ]
+          { href: "/lecturer/questions", label: "Answer Questions", icon: HelpCircle },
+          { href: "/lecturer/upload", label: "Upload Lessons", icon: BookOpen },
+        ]
       : []),
     ...(isAdmin ? [{ href: "/admin", label: "Admin Panel", icon: Settings }] : []),
   ]
@@ -205,3 +213,5 @@ export default function NavBar() {
     </nav>
   )
 }
+
+export default NavBar

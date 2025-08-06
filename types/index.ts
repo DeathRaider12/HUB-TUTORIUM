@@ -2,19 +2,20 @@
 export interface Question {
     id: string;
     title: string;
-    content: string;
-    authorId: string;
-    createdAt: Date;
-    updatedAt: Date;
+    description: string;
+    userId: string;
+    userEmail: string;
+    userName: string;
+    subject: string;
     tags: string[];
-    bounty?: number;          // Optional points reward
-    visibility: 'public' | 'private' | 'institution';
-    relatedQuestions: string[]; // Similar questions
-    followersCount: number;   // Users following the question
-    attachments: Attachment[];
-    status: 'open' | 'answered' | 'closed';
+    urgency: 'low' | 'medium' | 'high';
+    createdAt: Timestamp;
+    answered: boolean;
+    answer?: string;
+    answeredAt?: Timestamp;
     views: number;
-    votes: number;
+    upvotes: number;
+    status: 'open' | 'closed' | 'in-progress';
 }
 
 export interface Attachment {

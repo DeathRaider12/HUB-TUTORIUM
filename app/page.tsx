@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import Footer from "@/components/Footer"
 
 export default function HomePage() {
   return (
@@ -117,9 +118,7 @@ export default function HomePage() {
           </div>
         </section>
         {/* Footer */}
-        <footer className="py-8 bg-white border-t text-center text-sm text-gray-500">
-          &copy; {new Date().getFullYear()} Tutorium. All rights reserved.
-        </footer>
+        <Footer />
       </main>
     </>
   )
